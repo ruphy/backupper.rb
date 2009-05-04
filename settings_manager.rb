@@ -1,6 +1,9 @@
 
-
 class Location
+  attr_accessor :name, :url
+end
+
+class Repo
   attr_accessor :location, :type,
                 :name, :url
 end
@@ -8,10 +11,11 @@ end
 class SettingsManager
 
   def initialize
-    reparse
+    reparse_config
+    @repos = {}
   end
 
-  def reparse
+  def reparse_config
     @home = Array.new
     IO.foreach($config_file) do |line|
       # skip comments
@@ -19,9 +23,13 @@ class SettingsManager
       # first, locations!
       if line.start_with? '['
         
+        line.each do |i|
+          
+        end
+        next
       end
       if line.start_with? "home"
-        repo = Location.new
+        repo = Repo.new
         config = line.split(',')
         repo.location = config[0]
         repo.type = config[1]
@@ -32,8 +40,8 @@ class SettingsManager
     end
   end
 
-  def get_places dir
-    if dir == :home
+  def get_repos_for location
+    if location == :home
       return @home
     end
   end

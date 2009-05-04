@@ -106,8 +106,8 @@ class Widget < Qt::Widget
     d.show
   end
 
-  def get_locations_for repo
-    return @settings.get_places repo
+  def get_locations_for location
+    return @settings.get_repos_for location
   end
 
 end
