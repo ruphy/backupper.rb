@@ -1,0 +1,163 @@
+
+$ui_file = "backupper.ui"
+$config_file = "backup_places.cfg"
+
+require 'korundum4'
+# compile the rb file each time from the ui, so we make sure it's
+# up to date. it's very cheap, and easier for development
+system("rbuic4 #{$ui_file} > backupper_ui.rb")
+require 'backupper_ui.rb'
+
+# commodity function
+def new symbol
+  return symbol.new
+end
+
+class Location
+  attr_accessor :location, :type,
+                :name, :url
+end
+
+class SettingsManager
+
+  def initialize
+    reparse
+  end
+
+  def reparse
+    @home = Array.new
+    IO.foreach($config_file) do |line|
+      # skip comments
+      next if line.start_with? '#'
+      # first, locations!
+      if line.start_with? '['
+        
+      if line.start_with? "home"
+        repo = Location.new
+        config = line.split(',')
+        repo.location = config[0]
+        repo.type = config[1]
+        repo.name = config[2]
+        repo.url = config[3]
+        @home << repo
+      end
+    end
+  end
+
+  def get_places dir
+    if dir == :home
+      return @home
+    end
+  end
+  
+end
+
+class GitManager
+
+  def initialize path
+    @path = path
+  end
+  
+  def is_working_dir_clean?
+    @output = `cd #{@path}; git status`
+    @output.each do |line|
+      next if line.start_with? '#'
+      return true if line.include? "working directory clean"
+    end
+    return false
+  end
+
+end
+
+class Widget < Qt::Widget
+
+  def initialize parent = nil
+    super(parent)
+    
+    @settings = SettingsManager.new
+    
+    l = Qt::VBoxLayout.new
+    ui_widget = Qt::Widget.new
+    @ui = Ui::Form.new #load_ui("backupper.ui")
+    @ui.setup_ui ui_widget
+
+    connect_slots
+    update_labels
+
+    l.addWidget Qt::Label.new "<big><center><b>ruphy</b>'s Backup Manager!</center></big>"
+    l.addWidget ui_widget
+
+    setLayout(l)
+  end
+
+#   def load_ui filename
+#     file = Qt::File.new(filename)
+#     file.open(Qt::File::ReadOnly)
+# 
+#     loader = Qt::UiLoader.new
+#     ui = loader.load(file, nil)
+#     file.close
+#     return ui
+#   end
+
+  def update_labels
+    home_git = GitManager.new '~'
+    if home_git.is_working_dir_clean?
+      @ui.gibak_label.text = "The index is <b style=\"color:#55aa00;\">clean</b>."
+    else
+      @ui.gibak_label.text = "The index is <b style=\"color:red;\">dirty</b>."
+    end
+  end
+  
+  def connect_slots
+    @ui.gibak_status.connect(SIGNAL :clicked) { gibak_show_status }
+    @ui.gibak_push.connect(SIGNAL :clicked) { dialog_git_push :home }
+  end
+
+  def gibak_show_status # TODO: make me better
+    d = KDE::Dialog.new self
+    t = Qt::TextEdit.new
+    t.text = `cd; git status`
+    t.read_only = true
+    d.size_grip_enabled = true
+    d.main_widget = t
+    d.show
+  end
+
+  def dialog_git_push repo
+    d = KDE::Dialog.new self
+
+    w = Qt::Widget.new
+    l = Qt::VBoxLayout.new
+    label = Qt::Label.new("Please select the repos where you want to push:")
+    l.addWidget label
+
+    get_locations_for(repo).each do |location|
+      checkbox = Qt::CheckBox.new "#{location.name} - (#{location.type})"
+      l.addWidget checkbox
+    end
+
+    w.layout = l
+
+    d.size_grip_enabled = true
+    d.main_widget = w
+    d.show
+  end
+
+  def get_locations_for repo
+    return @settings.get_places repo
+  end
+
+end
+
+# make test work nicely - don't run the application if you're running them.
+if $0 == __FILE__
+  about = KDE::AboutData.new("backupper.rb", "Backupper", KDE.ki18n("Backup Manager"), "0.1")
+  KDE::CmdLineArgs.init(ARGV, about)
+  a = KDE::Application.new
+  d = KDE::MainWindow.new
+  w = Widget.new
+  d.central_widget = w
+  d.show
+  a.exec
+end

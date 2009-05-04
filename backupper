@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+
+require 'korundum4'
+require 'backupper.rb'
+
+about = KDE::AboutData.new("backupper.rb", "Backupper", KDE.ki18n("Backup Manager"), "0.1")
+KDE::CmdLineArgs.init(ARGV, about)
+a = KDE::Application.new
+d = KDE::MainWindow.new
+w = Widget.new
+d.central_widget = w
+d.show
+a.exec
+
