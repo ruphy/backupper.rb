@@ -52,16 +52,6 @@ class Widget < Qt::Widget
     setLayout(l)
   end
 
-#   def load_ui filename
-#     file = Qt::File.new(filename)
-#     file.open(Qt::File::ReadOnly)
-# 
-#     loader = Qt::UiLoader.new
-#     ui = loader.load(file, nil)
-#     file.close
-#     return ui
-#   end
-
   def update_labels
     home_git = GitManager.new '~'
     if home_git.is_working_dir_clean?
