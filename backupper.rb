@@ -32,6 +32,7 @@ class SettingsManager
       # first, locations!
       if line.start_with? '['
         
+      end
       if line.start_with? "home"
         repo = Location.new
         config = line.split(',')
@@ -150,14 +151,3 @@ class Widget < Qt::Widget
 
 end
 
-# make test work nicely - don't run the application if you're running them.
-if $0 == __FILE__
-  about = KDE::AboutData.new("backupper.rb", "Backupper", KDE.ki18n("Backup Manager"), "0.1")
-  KDE::CmdLineArgs.init(ARGV, about)
-  a = KDE::Application.new
-  d = KDE::MainWindow.new
-  w = Widget.new
-  d.central_widget = w
-  d.show
-  a.exec
-end
