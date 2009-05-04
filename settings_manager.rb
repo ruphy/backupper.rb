@@ -11,39 +11,37 @@ end
 class SettingsManager
 
   def initialize
+    @repos = Hash.new
+    
     reparse_config
-    @repos = {}
   end
 
   def reparse_config
-    @home = Array.new
+    @repos[:home] = Array.new
     IO.foreach($config_file) do |line|
+      line.lstrip!
       # skip comments
       next if line.start_with? '#'
       # first, locations!
       if line.start_with? '['
-        
-        line.each do |i|
-          
-        end
+        c = line.split('=')
+        c[0].chop!
         next
       end
-      if line.start_with? "home"
+      config = line.split(',')
+      if config.size == 4
         repo = Repo.new
-        config = line.split(',')
         repo.location = config[0]
         repo.type = config[1]
         repo.name = config[2]
         repo.url = config[3]
-        @home << repo
+        @repos[repo.location.to_sym] << repo
       end
     end
   end
 
   def get_repos_for location
-    if location == :home
-      return @home
-    end
+    return @repos[location]
   end
   
 end
