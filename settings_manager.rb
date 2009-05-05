@@ -25,7 +25,8 @@ class SettingsManager
       # first, locations!
       if line.start_with? '['
         c = line.split('=')
-        c[0].chop!
+        c[0].gsub!('[', '').gsub!(']', '')
+        puts c
         next
       end
       config = line.split(',')

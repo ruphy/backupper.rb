@@ -29,6 +29,10 @@ class GitManager
     return false
   end
 
+  def status
+    return `cd #{@path}; git status`
+  end
+
 end
 
 class Widget < Qt::Widget
