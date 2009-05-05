@@ -1,4 +1,6 @@
 
+require 'error_manager'
+
 class Location
   attr_accessor :name, :path
   
@@ -60,9 +62,7 @@ class SettingsManager
         @locations[l.name.to_sym] = l
         @repos[l.name.to_sym] = Array.new
         if !l.complete?
-          puts "Malformed configuration line -- #{$config_file}:#{i}"
-          puts ">> #{line}"
-          exit 1
+          ErrorManager.abort_malformed_config_line i, line
         end
         next
       end
@@ -76,9 +76,7 @@ class SettingsManager
       repo.url = config[3]
       @repos[repo.location.name.to_sym] << repo
       if !repo.complete?
-        puts "Malformed configuration line -- #{$config_file}:#{i}"
-        puts ">> #{line}"
-        exit 1
+        ErrorManager.abort_malformed_config_line i, line
       end
     end
   end
