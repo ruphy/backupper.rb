@@ -16,13 +16,13 @@ class Location
 end
 
 class Repo
-  attr_accessor :location, :type,
+  attr_accessor :location, :repo_type,
                 :name, :url
   
   def complete?
     begin
       if !name.empty? && !url.empty? &&
-         location.complete? && !type.empty?
+         location.complete? && !repo_type.empty?
         return true
       end
     rescue NoMethodError
@@ -36,10 +36,10 @@ class SettingsManager
   def initialize
     @repos = Hash.new
     @locations = Hash.new
-    reparse_config
+    parse_config
   end
 
-  def reparse_config
+  def parse_config
     i = 0
     IO.foreach($config_file) do |line|
       # counter
@@ -71,7 +71,7 @@ class SettingsManager
       config = line.split(',')
       repo = Repo.new
       repo.location = @locations[config[0].to_sym]
-      repo.type = config[1]
+      repo.repo_type = config[1]
       repo.name = config[2]
       repo.url = config[3]
       @repos[repo.location.name.to_sym] << repo
@@ -81,8 +81,16 @@ class SettingsManager
     end
   end
 
+  def locations
+    return @locations.values
+  end
+
+  def repos
+    return @repos.values
+  end
+  
   def get_repos_for location
-    return @repos[location]
+    return @repos[location.to_sym]
   end
   
 end

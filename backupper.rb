@@ -3,7 +3,8 @@ $ui_file = "backupper.ui"
 $config_file = "backup_places.cfg"
 
 require 'korundum4'
-require 'settings_manager'
+require 'settings_manager.rb'
+require 'git_manager.rb'
 # compile the rb file each time from the ui, so we make sure it's
 # up to date. it's very cheap, and easier for development
 system("rbuic4 #{$ui_file} > backupper_ui.rb")
@@ -14,37 +15,28 @@ def new symbol
   return symbol.new
 end
 
-class GitManager
-
-  def initialize path
-    @path = path
-  end
-  
-  def is_working_dir_clean?
-    @output = `cd #{@path}; git status`
-    @output.each do |line|
-      next if line.start_with? '#'
-      return true if line.include? "working directory clean"
-    end
-    return false
-  end
-
-  def status
-    return `cd #{@path}; git status`
-  end
-
-end
-
 class Widget < Qt::Widget
 
   def initialize parent = nil
     super(parent)
+
+    @gits = Hash.new
     
     @settings = SettingsManager.new
+    @settings.repos.each do |r_a|
+      r_a.each do |r|
+        if r.repo_type == "git"
+          s = r.location.name.to_sym
+          @gits[s] = Array.new if @gits[s] == nil
+          @gits[s] << GitManager.new(r)
+        end
+      end
+    end
+
     
     l = Qt::VBoxLayout.new
     ui_widget = Qt::Widget.new
-    @ui = Ui::Form.new #load_ui("backupper.ui")
+    @ui = Ui::Form.new
     @ui.setup_ui ui_widget
 
     connect_slots
@@ -57,8 +49,7 @@ class Widget < Qt::Widget
   end
 
   def update_labels
-    home_git = GitManager.new '~'
-    if home_git.is_working_dir_clean?
+    if @gits[:home][0].working_dir_clean?
       @ui.gibak_label.text = "The index is <b style=\"color:#55aa00;\">clean</b>."
     else
       @ui.gibak_label.text = "The index is <b style=\"color:red;\">dirty</b>."
@@ -73,14 +64,14 @@ class Widget < Qt::Widget
   def gibak_show_status # TODO: make me better
     d = KDE::Dialog.new self
     t = Qt::TextEdit.new
-    t.text = `cd; git status`
+    t.text = @gits[:home].status
     t.read_only = true
     d.size_grip_enabled = true
     d.main_widget = t
     d.show
   end
 
-  def dialog_git_push repo
+  def dialog_git_push path
     d = KDE::Dialog.new self
 
     w = Qt::Widget.new
@@ -88,7 +79,7 @@ class Widget < Qt::Widget
     label = Qt::Label.new("Please select the repos where you want to push:")
     l.addWidget label
 
-    get_locations_for(repo).each do |location|
+    @settings.get_repos_for(path).each do |location|
       checkbox = Qt::CheckBox.new "#{location.name} - (#{location.type})"
       l.addWidget checkbox
     end
@@ -98,10 +89,6 @@ class Widget < Qt::Widget
     d.size_grip_enabled = true
     d.main_widget = w
     d.show
-  end
-
-  def get_locations_for location
-    return @settings.get_repos_for location
   end
 
 end
