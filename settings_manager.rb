@@ -90,7 +90,7 @@ class SettingsManager
   end
   
   def get_repos_for location
-    return @repos[location.to_sym]
+    return @repos[location.name.to_sym]
   end
   
 end
