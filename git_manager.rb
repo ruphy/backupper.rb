@@ -1,6 +1,11 @@
 
 class Remote
   attr_accessor :remote, :branch
+
+  def initialize remote, branch
+    @remote = remote
+    @branch = branch
+  end
 end
 
 class GitManager
@@ -23,7 +28,7 @@ class GitManager
     return `cd #{@repo.location.path}; git status`
   end
 
-  def add_remote remote, branch
+  def add_remote remote, branch = :current
     @remotes << Remote.new(remote, branch)
   end
 

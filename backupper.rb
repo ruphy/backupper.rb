@@ -27,8 +27,8 @@ class Widget < Qt::Widget
       r_a.each do |r|
         if r.repo_type == "git"
           s = r.location.name.to_sym
-          @gits[s] = Array.new if @gits[s] == nil
-          @gits[s] << GitManager.new(r)
+          @gits[s] = GitManager.new(r) if @gits[s] == nil
+          @gits[s].add_remote r.url
         end
       end
     end
@@ -49,7 +49,7 @@ class Widget < Qt::Widget
   end
 
   def update_labels
-    if @gits[:home][0].working_dir_clean?
+    if @gits[:home].working_dir_clean?
       @ui.gibak_label.text = "The index is <b style=\"color:#55aa00;\">clean</b>."
     else
       @ui.gibak_label.text = "The index is <b style=\"color:red;\">dirty</b>."
