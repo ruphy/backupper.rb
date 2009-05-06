@@ -10,8 +10,8 @@ class Location
         return true
       end
     rescue NoMethodError
-      return false
     end
+    return false
   end
 end
 
@@ -26,8 +26,8 @@ class Repo
         return true
       end
     rescue NoMethodError
-      return false
     end
+    return false
   end
 end
 
