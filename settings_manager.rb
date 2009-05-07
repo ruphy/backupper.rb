@@ -34,8 +34,8 @@ end
 class SettingsManager
 
   def initialize
-    @repos = Hash.new
-    @locations = Hash.new
+    @repos = Array.new
+    @locations = Array.new
     parse_config
   end
 
@@ -59,8 +59,7 @@ class SettingsManager
         l = Location.new
         l.name = c[0]
         l.path = c[1]
-        @locations[l.name.to_sym] = l
-        @repos[l.name.to_sym] = Array.new
+        @locations << l
         if !l.complete?
           ErrorManager.abort_malformed_config_line i, line
         end
@@ -70,11 +69,11 @@ class SettingsManager
       # if we arrive here, it's a repo config.
       config = line.split(',')
       repo = Repo.new
-      repo.location = @locations[config[0].to_sym]
+      repo.location = @locations.find {|x| x.name == config[0] }
       repo.repo_type = config[1]
       repo.name = config[2]
       repo.url = config[3]
-      @repos[repo.location.name.to_sym] << repo
+      @repos << repo
       if !repo.complete?
         ErrorManager.abort_malformed_config_line i, line
       end
@@ -82,36 +81,27 @@ class SettingsManager
   end
 
   def locations
-    return @locations.values
+    return @locations
   end
 
   def repos repo_type = :all
-    if repo_type == :all
-      return @repos.values
-    else
-      temp = Array.new
-      @repos.values.each do |repo|
-        temp << repo if repo.repo_type == repo_type.to_s
-      end
-      return temp
+    temp = @repos
+    unless repo_type == :all
+      temp = temp.find_all {|x| x.repo_type == repo_type.to_s }
     end
-
+    return temp
   end
 
   def repo_types
     return @repo_types
   end
-  
+
   def get_repos_for location, repo_type = :all
-    if repo_type == :all
-      return @repos[location.name.to_sym]
-    else
-      temp = Array.new
-      @repos[location.name.to_sym].each do |repo|
-        temp << repo if repo.repo_type == repo_type.to_s
-      end
-      return temp
+    temp = @repos.find_all {|x| x.location.name == location.name }
+    unless repo_type == :all
+      temp = temp.find_all {|x| x.repo_type == repo_type.to_s }
     end
+    return temp
   end
 
 end

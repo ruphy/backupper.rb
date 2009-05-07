@@ -23,15 +23,13 @@ class Widget < Qt::Widget
     @gits = Hash.new
     
     @settings = SettingsManager.new
-    @settings.repos.each do |r_a|
-      r_a.each do |r|
+    @settings.repos("git").each do |r|
+#       r_a.each do |r|
         next if !r.complete?
-        if r.repo_type == "git"
-          s = r.location.name.to_sym
-          @gits[s] = GitManager.new(r) if @gits[s] == nil
-          @gits[s].add_remote r.url
-        end
-      end
+        s = r.location.name.to_sym
+        @gits[s] = GitManager.new(r) if @gits[s] == nil
+        @gits[s].add_remote r.url
+#       end
     end
 
     l = Qt::VBoxLayout.new
