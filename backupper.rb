@@ -34,7 +34,6 @@ class Widget < Qt::Widget
       end
     end
 
-    
     l = Qt::VBoxLayout.new
     ui_widget = Qt::Widget.new
     @ui = Ui::Form.new
