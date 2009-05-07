@@ -88,9 +88,21 @@ class SettingsManager
   def repos
     return @repos.values
   end
+
+  def repo_types
+    return @repo_types
+  end
   
-  def get_repos_for location
-    return @repos[location.name.to_sym]
+  def get_repos_for location, repo_type = :all
+    if repo_type == :all
+      return @repos[location.name.to_sym]
+    else
+      temp = Array.new
+      @repos[location.name.to_sym].each do |repo|
+        temp << repo if repo.repo_type == repo_type.to_s
+      end
+      return temp
+    end
   end
   
 end

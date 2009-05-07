@@ -101,7 +101,7 @@ class Widget < Qt::Widget
     l.addWidget label
 
     @settings.get_repos_for(location).each do |repo|
-      checkbox = Qt::CheckBox.new "#{repo.name} - (#{repo.repo_type})"
+      checkbox = Qt::CheckBox.new "#{repo.name} - (#{repo.repo_type.to_s})"
       l.addWidget checkbox
     end
 
