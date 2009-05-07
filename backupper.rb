@@ -45,6 +45,7 @@ class Widget < Qt::Widget
 
   def add_gits
     @settings.locations.each do |location|
+      l_sym = location.name.to_sym
       title = "#{location.name.capitalize}"
       title += " (gibak)" if location.name == "home"
       group_box = Qt::GroupBox.new title
@@ -59,10 +60,10 @@ class Widget < Qt::Widget
       h_layout.add_item v_layout
       group_box.layout = h_layout
 
-      git_update_status_label(status_label, location)
+      set_status_label_clean(status_label, @gits[l_sym].working_dir_clean?)
 
       status_button.connect(SIGNAL :clicked) {
-        show_tree_status_dialog @gits[location.name.to_sym].status
+        show_tree_status_dialog @gits[l_sym].status
       }
 
       push_button.connect(SIGNAL :clicked) { git_push_dialog location }
@@ -73,8 +74,8 @@ class Widget < Qt::Widget
     @ui.git_layout.add_stretch
   end
 
-  def git_update_status_label label, location
-    if @gits[location.name.to_sym].working_dir_clean?
+  def set_status_label_clean label, clean
+    if clean
       label.text = "The index is <b style=\"color:#55aa00;\">clean</b>."
     else
       label.text = "The index is <b style=\"color:red;\">dirty</b>."
