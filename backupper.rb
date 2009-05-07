@@ -60,7 +60,11 @@ class Widget < Qt::Widget
       group_box.layout = h_layout
 
       git_update_status_label(status_label, location)
-      status_button.connect(SIGNAL :clicked) { git_status_dialog location }
+
+      status_button.connect(SIGNAL :clicked) {
+        show_tree_status_dialog @gits[location.name.to_sym].status
+      }
+
       push_button.connect(SIGNAL :clicked) { git_push_dialog location }
 
       @ui.git_layout.add_widget group_box
@@ -77,10 +81,10 @@ class Widget < Qt::Widget
     end
   end
 
-  def git_status_dialog location
+  def show_tree_status_dialog text
     d = KDE::Dialog.new self
     t = Qt::TextEdit.new
-    t.text = @gits[location.name.to_sym].status
+    t.text = text
     t.read_only = true
     d.size_grip_enabled = true
     d.main_widget = t
