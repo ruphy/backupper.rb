@@ -44,9 +44,16 @@ class GitManager
     end
   end
 
-  def gibak_commit
+  def add
+    `cd #{@repo.location.path}; git add .` unless @repo.location.name == "gibak"
+  end
 
+  def commit log
+    if @repo.location.name == "gibak"
+      `cd ~; gibak commit`
+    else
+      puts `cd #{@repo.location.path}; git commit -m "#{log}"`
+    end
   end
   
 end
-
