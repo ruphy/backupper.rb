@@ -24,8 +24,16 @@ class GitManager
     return false
   end
   
+  def branch
+    cd_path
+    `git branch`.each do |line|
+      return line.gsub!('* ', '') if line.contain? '*'
+    end
+  end
+  
   def status
-    return `cd #{@repo.location.path}; git status`
+    cd @repo.location.path
+    return `git status`
   end
 
   def add_remote remote, branch = :current
@@ -38,22 +46,37 @@ class GitManager
 
   def push remote = :all
     if remote == :all
-      #foreach - push
+      @remotes.each do |r|
+          push r
+        end
     else
-      #push remote
+      run("git push #{remote}")
     end
   end
 
   def add
-    `cd #{@repo.location.path}; git add .` unless @repo.location.name == "gibak"
+    unless @repo.location.name == "gibak"
+      cd @repo.location.path
+      run("git add .")
+    end
+  end
+
+  def cd_path
+    if @repo.location.name == "gibak"
+      run("cd ~")
+    else
+#       run("cd #{@repo.location.path}")
+    end
   end
 
   def commit log
+    cd_path
     if @repo.location.name == "gibak"
-      `cd ~; gibak commit`
+      run("gibak commit")
     else
-      puts `cd #{@repo.location.path}; git commit -m "#{log}"`
+      run("git commit -m \"#{log}\"")
     end
+#     puts KDE::Global::config.groupList
   end
   
 end
