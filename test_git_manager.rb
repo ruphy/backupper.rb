@@ -15,5 +15,5 @@ repo.repo_type = "git"
 
 c = GitManager.new repo
 puts c.working_dir_clean?
-puts c.branch
+puts c.current_branch
 
