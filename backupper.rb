@@ -78,17 +78,19 @@ class Widget < Qt::Widget
 
       set_status_label_clean(status_label, @gits[l_sym].working_dir_clean?)
 
-      status_button.connect(SIGNAL :clicked) {
+      status_button.connect(SIGNAL :clicked) do
         show_index_status_dialog @gits[l_sym].status
-      }
+      end
 
-      push_button.connect(SIGNAL :clicked) { git_push_dialog location }
+      push_button.connect(SIGNAL :clicked) do
+        git_push_dialog location
+      end
 
-      commit_button.connect(SIGNAL :clicked) {
-        if git_commit(location)
+      commit_button.connect(SIGNAL :clicked) do
+        if git_commit location
           set_status_label_clean(status_label, @gits[l_sym].working_dir_clean?)
         end
-      }
+      end
 
       @ui.git_layout.add_widget group_box
     end
@@ -106,7 +108,7 @@ class Widget < Qt::Widget
       puts d.exec
       log = t.text()
     end
-    if log == "" && !location.name.to_sym == :gibak
+    if log.empty? && !location.name.to_sym == :gibak
       log = "Empty log"
     end
 
