@@ -10,6 +10,24 @@ require 'git_manager.rb'
 system("rbuic4 #{$ui_file} > backupper_ui.rb")
 require 'backupper_ui.rb'
 
+# dev variables
+$debug = true
+$dry_run = true
+
+def debug string
+  puts "--- #{Dir.pwd} ### #{string}" if $debug
+end
+
+def run command
+  debug(command)
+  system("command") unless $dry_run
+end
+
+def cd path
+  debug("Dir.chdir #{path}")
+  Dir.chdir path
+end
+
 class Widget < Qt::Widget
 
   def initialize parent = nil
