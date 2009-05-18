@@ -27,8 +27,9 @@ class GitManager
   def branch
     cd_path
     `git branch`.each do |line|
-      return line.gsub!('* ', '') if line.contain? '*'
+      return line.gsub!('* ', '') if line.include? '*'
     end
+    return :no_branch
   end
   
   def status
