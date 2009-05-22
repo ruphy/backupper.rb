@@ -18,6 +18,16 @@ end
 class Repo
   attr_accessor :location, :repo_type,
                 :name, :url
+
+  attr_reader :remotes
+  
+  def initialize
+    @remotes = Array.new
+  end
+  
+  def add_remote remote
+    @remotes << remote
+  end
   
   def complete?
     begin

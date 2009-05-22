@@ -19,8 +19,9 @@ def debug string
 end
 
 def run command
-  debug(command)
-  system("command") unless $dry_run
+  debug "pretending to run -- #{command}" if $dry_run
+  debug("executing '" + command +"'") unless $dry_run
+  `#{command}` unless $dry_run
 end
 
 def cd path
@@ -63,11 +64,13 @@ class Widget < Qt::Widget
       title += " (home)" if location.name == "gibak"
       group_box = Qt::GroupBox.new title
       status_label = Qt::Label.new
+      buttons_header = Qt::Label.new "Git commands:"
       status_button = Qt::PushButton.new "status"
       commit_button = Qt::PushButton.new "add and commit"
       commit_button.text = "gibak commit" if location.name == "gibak"
       push_button = Qt::PushButton.new "push (...)"
       v_layout = Qt::VBoxLayout.new
+      v_layout.add_widget buttons_header
       v_layout.add_widget status_button
       v_layout.add_widget commit_button
       v_layout.add_widget push_button
@@ -103,14 +106,14 @@ class Widget < Qt::Widget
     d = KDE::Dialog.new self
     unless location.name.to_sym == :gibak
       t = KDE::LineEdit.new
-      t.text = "<log message...>"
+      t.text = Time.now.to_s
       d.main_widget = t
-      puts d.exec
       log = t.text()
     end
     if log.empty? && !location.name.to_sym == :gibak
       log = "Empty log"
     end
+    d.exec
 
     if d.result == Qt::Dialog::Accepted then
       @gits[location.name.to_sym].add
@@ -144,18 +147,41 @@ class Widget < Qt::Widget
     w = Qt::Widget.new
     l = Qt::VBoxLayout.new
     label = Qt::Label.new("Please select the repos where you want to push:")
-    l.addWidget label
+    l.add_widget label
 
+    checkboxes = Hash.new
+
+    group_box = Qt::GroupBox.new "Push into individual repos"
+    group_box.layout = Qt::VBoxLayout.new
+    group_box.checkable = true
+    group_box.checked = false
+
+    l.add_widget group_box
     @settings.get_repos_for(location).each do |repo|
-      checkbox = Qt::CheckBox.new "#{repo.name} - (#{repo.repo_type.to_s})"
-      l.addWidget checkbox
+      checkboxes[repo] = Qt::CheckBox.new(
+                         "#{repo.name} - (#{repo.repo_type.to_s})",
+                         group_box)
+      
+      group_box.layout.add_widget checkboxes[repo]
     end
 
     w.layout = l
 
     d.size_grip_enabled = true
     d.main_widget = w
-    d.show
+    d.exec
+
+    if d.result == Qt::Dialog::Accepted then
+      if group_box.checked
+        @settings.get_repos_for(location).each do |repo|
+          if checkboxes[repo].is_checked
+            @gits[location.name.to_sym].push repo.remote
+          end
+        end
+      else
+        @gits[location.name.to_sym].push
+      end
+    end
   end
 
 end

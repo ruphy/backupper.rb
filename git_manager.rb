@@ -16,7 +16,8 @@ class GitManager
   end
   
   def working_dir_clean?
-    @output = `cd #{@repo.location.path}; git status`
+    cd_path
+    @output = run("git status")
     @output.each do |line|
       next if line.start_with? '#'
       return true if line.include? "working directory clean"
@@ -26,7 +27,7 @@ class GitManager
   
   def current_branch
     cd_path
-    `git branch`.each do |line|
+    run("git branch").each do |line|
       return line.gsub!('* ', '') if line.include? '*'
     end
     return :no_branch
@@ -38,7 +39,9 @@ class GitManager
   end
 
   def add_remote remote, branch = :current
+    branch = current_branch if branch == :current
     @remotes << Remote.new(remote, branch)
+    @repo.add_remote Remote.new(remote, branch)
   end
 
   def remotes
@@ -51,7 +54,7 @@ class GitManager
           push r
         end
     else
-      run("git push #{remote}")
+      run("git push #{remote.remote}")
     end
   end
 
@@ -64,9 +67,9 @@ class GitManager
 
   def cd_path
     if @repo.location.name == "gibak"
-      run("cd ~")
+      cd File.expand_path '~'
     else
-#       run("cd #{@repo.location.path}")
+      cd @repo.location.path
     end
   end
 
