@@ -17,7 +17,7 @@ class GitManager
   
   def working_dir_clean?
     cd_path
-    @output = run("git status")
+    @output = f_run("git status")
     @output.each do |line|
       next if line.start_with? '#'
       return true if line.include? "working directory clean"
@@ -27,7 +27,7 @@ class GitManager
   
   def current_branch
     cd_path
-    run("git branch").each do |line|
+    f_run("git branch").each do |line|
       return line.gsub!('* ', '') if line.include? '*'
     end
     return :no_branch

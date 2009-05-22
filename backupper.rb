@@ -18,13 +18,24 @@ def debug string
   puts "--- #{Dir.pwd} ### #{string}" if $debug
 end
 
-def run command
+# Force run
+def f_run c
+  run c, true
+end
+
+def run command, force_run = false
   debug "pretending to run -- #{command}" if $dry_run
   debug("executing '" + command +"'") unless $dry_run
-  `#{command}` unless $dry_run
+  `#{command}` unless ($dry_run and !force_run)
 end
 
 def cd path
+  path = File.expand_path path
+  unless File.directory? path
+    puts "#{path} is not a valid directory, not CD'ing into it..."
+    return
+  end
+  return if Dir.pwd == path
   debug("Dir.chdir #{path}")
   Dir.chdir path
 end
@@ -105,19 +116,26 @@ class Widget < Qt::Widget
     log = String.new
     d = KDE::Dialog.new self
     unless location.name.to_sym == :gibak
-      t = KDE::LineEdit.new
-      t.text = Time.now.to_s
+      t = Qt::TextEdit.new
+      t.plain_text = "# log message \ncommit status as of:\n" + Time.now.to_s
       d.main_widget = t
-      log = t.text()
     end
     if log.empty? && !location.name.to_sym == :gibak
       log = "Empty log"
     end
     d.exec
-
+    
+    log = t.to_plain_text
+    clean_log = ""
+    log.split("\n").each do |line|
+      next if line.strip.start_with? '#'
+      clean_log += "#{line}\n"
+    end
+    clean_log.strip!
+    
     if d.result == Qt::Dialog::Accepted then
       @gits[location.name.to_sym].add
-      @gits[location.name.to_sym].commit log
+      @gits[location.name.to_sym].commit clean_log
       return true
     end
     return false
