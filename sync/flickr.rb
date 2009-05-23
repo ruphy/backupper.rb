@@ -1,5 +1,8 @@
+require 'rubygems'
+require 'flickr'
+require 'base'
 
-class FlickrBackend
+class Flickr < Base
   attr_reader :flickr
   
   def initialize
@@ -16,7 +19,7 @@ class FlickrBackend
     end
   end
   
-  def 
+  def file_list
     
   end
 end

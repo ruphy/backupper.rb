@@ -1,6 +1,6 @@
 # This class is from the ruby-sync gem
 
-class Local < Sources::Base
+class Local < Base
   def initialize()
     
   end
