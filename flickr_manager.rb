@@ -96,7 +96,7 @@ class FlickrManager
     if photoset_exist? photoset_name
       #sync
       flickr_list = get_file_list photoset_name
-      puts flickr_list
+      
     else
       #just upload
       Dir["*"].each do |f|
