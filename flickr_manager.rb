@@ -51,12 +51,6 @@ class FlickrManager
 #     @flickr.photos.setPerms(id, false, false, false, "", "")
   end
   
-  def filename_to_title filename
-    arr = filename.split(File::SEPARATOR).last.split('.')
-    arr.pop
-    my_title = arr.join('.')
-  end
-  
   def get_photoset_id p
     a = nil
     @flickr.photosets.getList.each do |x|
@@ -90,6 +84,8 @@ class FlickrManager
   
   # Syncs a dir. path is relative
   def sync_dir dir
+    # TODO: think of a better name scheme
+    # maybe the title should include the relative path?
     photoset_name = "[ruphy-backup]#{dir}"
     Dir.chdir @root+'/'+dir
 
@@ -97,7 +93,6 @@ class FlickrManager
       #sync
       flickr_list = get_file_list photoset_name
       local_list =  Dir["*"]
-      
       remotely_missing = []
       locally_missing = []
       
@@ -111,8 +106,10 @@ class FlickrManager
       end
       puts "locally missing files: " + locally_missing.join(',')
       
+      # TODO: really perform sync
+      
     else
-      #just upload
+    # set not existing: just upload
       Dir["*"].each do |f|
         upload f, photoset_name
       end
