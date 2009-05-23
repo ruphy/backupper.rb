@@ -96,6 +96,20 @@ class FlickrManager
     if photoset_exist? photoset_name
       #sync
       flickr_list = get_file_list photoset_name
+      local_list =  Dir["*"]
+      
+      remotely_missing = []
+      locally_missing = []
+      
+      local_list.each do |f|
+        remotely_missing << f unless flickr_list.include? f
+      end
+      puts "remotely missing files: " + remotely_missing.join(',')
+      
+      flickr_list.each do |f|
+        locally_missing << f unless local_list.include? f
+      end
+      puts "locally missing files: " + locally_missing.join(',')
       
     else
       #just upload
