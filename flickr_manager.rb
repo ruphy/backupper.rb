@@ -2,6 +2,7 @@ require 'rubygems'
 require 'flickr'
 
 $token = "#{File.expand_path('~')}/.ruphy-backupper/flickr-token.cfg"
+$extensions = ["jpg", "png", "jpeg"]
 
 class FlickrManager
   attr_reader :flickr
@@ -20,6 +21,14 @@ class FlickrManager
     end
     
     @root = root
+  end
+  
+  def is_supported? filename
+    a = filename.split('.')
+    $extensions.each do |e|
+      return true if e == a.last.downcase
+    end
+    return false
   end
   
   def photoset_exist? name
@@ -41,6 +50,8 @@ class FlickrManager
   end
   
   def upload f, photoset
+    return if !is_supported?(f)
+  
     id = @flickr.photos.upload.upload_file f, f, "", Array.new, false, false, false
     if photoset_exist? photoset
       set_id = get_photoset_id(photoset)
@@ -86,12 +97,12 @@ class FlickrManager
   def sync_dir dir
     # TODO: think of a better name scheme
     # maybe the title should include the relative path?
-    photoset_name = "[ruphy-backup]#{dir}"
+    calculated_photoset_name = "[ruphy-backup]#{dir}"
     Dir.chdir @root+'/'+dir
 
-    if photoset_exist? photoset_name
+    if photoset_exist? calculated_photoset_name
       #sync
-      flickr_list = get_file_list photoset_name
+      flickr_list = get_file_list calculated_photoset_name
       local_list =  Dir["*"]
       remotely_missing = []
       locally_missing = []
@@ -99,19 +110,24 @@ class FlickrManager
       local_list.each do |f|
         remotely_missing << f unless flickr_list.include? f
       end
-      puts "remotely missing files: " + remotely_missing.join(',')
+#       puts "remotely missing files: " + remotely_missing.join(',')
+      
+      remotely_missing.each do |f|
+        upload f, calculated_photoset_name
+      end
+      
       
       flickr_list.each do |f|
         locally_missing << f unless local_list.include? f
       end
-      puts "locally missing files: " + locally_missing.join(',')
+      puts "we're locally missing: " + locally_missing.join(', ')
       
       # TODO: really perform sync
       
     else
     # set not existing: just upload
       Dir["*"].each do |f|
-        upload f, photoset_name
+        upload f, calculated_photoset_name
       end
     end
   end
@@ -119,5 +135,6 @@ class FlickrManager
 end
 
 f = FlickrManager.new "/home/ruphy/flickr"
-f.sync_dir "test"
+# f.sync_dir "test"
+puts f.is_supported? "waa.jpeg"
 
