@@ -13,8 +13,9 @@ class FlickrManager
     unless @flickr.auth.token
       @flickr.auth.getFrob
       url = @flickr.auth.login_link
-      puts "You must visit #{url} to authorize this application.  Press enter"+
-                             " when you have done so. This is the only time you will have to do this."
+      puts "You must visit #{url} to authorize this application.  Press enter" +
+           " when you have done so. This is the only time you will have to do" +
+           " this."
       gets
       @flickr.auth.getToken
       @flickr.auth.cache_token
@@ -36,30 +37,19 @@ class FlickrManager
       return true if x.title == name
     end
     return false
-#     args = {}
-#     args['user'] = @flickr.auth.token.user.nsid
-#     args['privacy_filter'] = "5" #private pics
-#     args['per_page'] = "2"
-#     args['contentType'] = "1"
-#     res = @flickr.call_method('flickr.photos.search', args)
-#     last_pic = Flickr::PhotoList.from_xml(res, @flickr)[1].id #each do |x|
-# #         puts x.id
-# #   end
-#     
-#     @flickr.photosets.create name, last_pic
   end
   
   def upload f, photoset
     return if !is_supported?(f)
   
-    id = @flickr.photos.upload.upload_file f, f, "", Array.new, false, false, false
+    id = @flickr.photos.upload.upload_file(f, f, "", Array.new,
+                                           false, false, false)
     if photoset_exist? photoset
       set_id = get_photoset_id(photoset)
       @flickr.photosets.addPhoto set_id, id
     else
       @flickr.photosets.create photoset, id
     end
-#     @flickr.photos.setPerms(id, false, false, false, "", "")
   end
   
   def get_photoset_id p
