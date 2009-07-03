@@ -1,0 +1,17 @@
+
+Lexicon:
+
+- Repo
+  represents an (abstract) remote repository, as in the config file.
+  - location: The Location it is associated with. -Location-
+  - repo_type: Repo type. -String-
+  - name: Human-readable name of the remote. -String-
+  - url: Url of the repo
+  - remotes: Array of Remote
+  
+- Location
+  represents an (abstract) local location, as in the config file.
+  -
+
+
+
