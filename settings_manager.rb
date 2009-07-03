@@ -106,6 +106,7 @@ class SettingsManager
     return @repo_types
   end
 
+  # Returns all repos for a certain location
   def get_repos_for location, repo_type = :all
     temp = @repos.find_all {|x| x.location.name == location.name }
     unless repo_type == :all
@@ -113,5 +114,18 @@ class SettingsManager
     end
     return temp
   end
+  
+  # Return a random repo for the specified location.
+  def get_random_repo_for location, repo_type = :all
+    if repo_type == :all
+      return @repos.find {|x| x.location.name == location.name }
+    end
+    return @repos.find {|x| x.location.name == location.name &&
+                            x.repo_type == repo_type.to_s}
+  end
+  
+#   def save
+  
+#   end
 
 end

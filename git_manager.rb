@@ -38,10 +38,14 @@ class GitManager
     return `git status`
   end
 
-  def add_remote remote, branch = :current
-    branch = current_branch if branch == :current
+  # Adds a remote
+  # remote: remote name
+  # branch: branch name, or :current, which is the same as the branch
+  # that is currently checked out at runtime.
+  def add_remote remote, branch = :current_branch
+    branch = current_branch if branch == :current_branch
     @remotes << Remote.new(remote, branch)
-    @repo.add_remote Remote.new(remote, branch)
+#     @repo.add_remote Remote.new(remote, branch)
   end
 
   def remotes
@@ -82,5 +86,10 @@ class GitManager
     end
 #     puts KDE::Global::config.groupList
   end
+  
+  def last_commit_date
+  end
+  
+#   def 
   
 end

@@ -117,30 +117,43 @@ class Widget < Qt::Widget
   def git_commit location
     log = String.new
     d = KDE::Dialog.new self
-    unless location.name.to_sym == :gibak
+    repo_sym = @settings.get_random_repo_for location, :git
+    
+    if repo_sym == :gibak
+      label = Qt::Label.new "Really commit?"
+      d.main_widget = label
+      
+      if d.result == Qt::Dialog::Accepted then
+        @gits[repo_sym].commit "" # gibak commit
+        return true
+      end
+      return false
+      
+    else
       t = Qt::TextEdit.new
       t.plain_text = "# log message \ncommit status as of:\n" + Time.now.to_s
       d.main_widget = t
+      if log.empty? && !location.name.to_sym == :gibak
+        log = "Empty log"
+      end
+      d.exec
+      
+      log = t.to_plain_text
+      clean_log = ""
+      log.split("\n").each do |line|
+        next if line.strip.start_with? '#'
+        clean_log += "#{line}\n"
+      end
+      clean_log.strip!
+      
+      if d.result == Qt::Dialog::Accepted then
+        @gits[repo_sym].add
+        @gits[repo_sym].commit clean_log
+        return true
+      end
+      return false
     end
-    if log.empty? && !location.name.to_sym == :gibak
-      log = "Empty log"
-    end
-    d.exec
-    
-    log = t.to_plain_text
-    clean_log = ""
-    log.split("\n").each do |line|
-      next if line.strip.start_with? '#'
-      clean_log += "#{line}\n"
-    end
-    clean_log.strip!
-    
-    if d.result == Qt::Dialog::Accepted then
-      @gits[location.name.to_sym].add
-      @gits[location.name.to_sym].commit clean_log
-      return true
-    end
-    return false
+    return false # we should never arrive here.
   end
 
   def set_status_label_clean label, clean
