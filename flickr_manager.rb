@@ -1,3 +1,4 @@
+
 require 'rubygems'
 require 'flickr'
 
@@ -8,8 +9,8 @@ class FlickrManager
   attr_reader :flickr
   
   def initialize root
-    @flickr = Flickr.new($token, "6b68b90702411082818b8ca39919434a", "db8e5e4d8a08aa00")
-    # puts flickr.auth.class
+    @flickr = Flickr.new($token, "6b68b90702411082818b8ca39919434a",
+                         "db8e5e4d8a08aa00")
     unless @flickr.auth.token
       @flickr.auth.getFrob
       url = @flickr.auth.login_link
@@ -24,6 +25,8 @@ class FlickrManager
     @root = root
   end
   
+  # filename => path to filename, or filename.
+  # checks the extension only.
   def is_supported? filename
     a = filename.split('.')
     $extensions.each do |e|
@@ -32,6 +35,7 @@ class FlickrManager
     return false
   end
   
+  # true if photoset named 'name' exists, false otherwise.
   def photoset_exist? name
     @flickr.photosets.getList.each do |x|
       return true if x.title == name
@@ -39,6 +43,8 @@ class FlickrManager
     return false
   end
   
+  # f => path to file to upload
+  # photoset => photoset name
   def upload f, photoset
     return if !is_supported?(f)
   
@@ -88,7 +94,7 @@ class FlickrManager
     # TODO: think of a better name scheme
     # maybe the title should include the relative path?
     calculated_photoset_name = "[ruphy-backup]#{dir}"
-    Dir.chdir @root+'/'+dir
+    Dir.chdir @root + '/' + dir
 
     if photoset_exist? calculated_photoset_name
       #sync
