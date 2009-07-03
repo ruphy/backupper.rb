@@ -50,9 +50,9 @@ class Widget < Qt::Widget
     @settings = SettingsManager.new
     @settings.repos("git").each do |r|
       next if !r.complete?
-      s = r.location.name.to_sym
-      @gits[s] = GitManager.new(r) if @gits[s] == nil
-      @gits[s].add_remote r.url
+      repo_sym = r.name.to_sym
+      @gits[repo_sym] = GitManager.new(r) if @gits[repo_sym] == nil
+      @gits[repo_sym].add_remote(r.url, :current_branch)
     end
 
     l = Qt::VBoxLayout.new
@@ -90,10 +90,12 @@ class Widget < Qt::Widget
       h_layout.add_item v_layout
       group_box.layout = h_layout
 
-      set_status_label_clean(status_label, @gits[l_sym].working_dir_clean?)
+      first_repo = @settings.get_repos_for(location).first
+      repo_sym = first_repo.name.to_sym
+      set_status_label_clean(status_label, @gits[repo_sym].working_dir_clean?)
 
       status_button.connect(SIGNAL :clicked) do
-        show_index_status_dialog @gits[l_sym].status
+        show_index_status_dialog @gits[repo_sym].status
       end
 
       push_button.connect(SIGNAL :clicked) do
@@ -102,7 +104,7 @@ class Widget < Qt::Widget
 
       commit_button.connect(SIGNAL :clicked) do
         if git_commit location
-          set_status_label_clean(status_label, @gits[l_sym].working_dir_clean?)
+          set_status_label_clean(status_label, @gits[repo_sym].working_dir_clean?)
         end
       end
 
