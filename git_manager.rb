@@ -10,8 +10,10 @@ end
 
 class GitManager
   
-  def initialize repo
+  def initialize repo, location = nil
     @repo = repo
+    @location = @repo.location unless @repo == nil
+    @location = location if @repo == nil
     @remotes = Array.new
   end
   
@@ -34,7 +36,7 @@ class GitManager
   end
   
   def status
-    cd @repo.location.path
+    cd @location.path
     return `git status`
   end
 
@@ -63,23 +65,23 @@ class GitManager
   end
 
   def add
-    unless @repo.location.name == "gibak"
-      cd @repo.location.path
+    unless @location.name == "gibak"
+      cd @location.path
       run("git add .")
     end
   end
 
   def cd_path
-    if @repo.location.name == "gibak"
+    if @location.name == "gibak"
       cd File.expand_path '~'
     else
-      cd @repo.location.path
+      cd @location.path
     end
   end
 
   def commit log
     cd_path
-    if @repo.location.name == "gibak"
+    if @location.name == "gibak"
       run("gibak commit")
     else
       run("git commit -m \"#{log}\"")
