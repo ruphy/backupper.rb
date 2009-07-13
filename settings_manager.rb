@@ -1,8 +1,37 @@
 
 require 'error_manager'
+require 'location_manager'
 
 class Location
   attr_accessor :name, :path
+
+  def initialize
+    @repos = Array.new
+    @managers = Hash.new
+  end
+  
+  def add_repo repo
+    @repos << repo if repo.class == Repo
+  end
+  
+  # Returns a LocationManager of the type 'type' (symbol)
+  def manager_for type
+    return GitLocationManager.new(self) if type == :git
+  end
+  
+  # Returns an array of all repo types, in symbols
+  def repo_types
+    types = Array.new
+    @repos.each do |r|
+      types << r.repo_type.to_sym unless types.contain? r.repo_type.to_sym ## FIXME check this line's syntax!!!
+    end
+    return types
+  end
+  
+  def repos repo_type = :any
+    return @repos if repo_type == :any
+    return @repos.find_all {|x| x.repo_type.to_sym == repo_type.to_sym }
+  end
   
   def complete?
     begin
@@ -79,10 +108,12 @@ class SettingsManager
       # if we arrive here, it's a repo config.
       config = line.split(',')
       repo = Repo.new
+      # TODO: use symbols and lowercase stuff.
       repo.location = @locations.find {|x| x.name == config[0] }
       repo.repo_type = config[1]
       repo.name = config[2]
       repo.url = config[3]
+      repo.location.add_repo repo # Associate the repo to the location
       @repos << repo
       if !repo.complete?
         ErrorManager.abort_malformed_config_line i, line
@@ -106,7 +137,7 @@ class SettingsManager
     return @repo_types
   end
 
-  # Returns all repos for a certain location
+  # Returns all repos for a certain location. Deprecated, use location.repos
   def get_repos_for location, repo_type = :all
     temp = @repos.find_all {|x| x.location.name == location.name }
     unless repo_type == :all
@@ -124,8 +155,18 @@ class SettingsManager
                             x.repo_type == repo_type.to_s}
   end
   
-#   def save
+  # Returns an UID for the specified location, as symbol.
+  def get_uid_for location
+    
+  end
   
+#   def get_location_manager_for location, repo_type = :any
+#     if repo_type == :any
+#       return @repos.find {|x| x.location.name == location.name }
+#     end
+#     return @repos.find {|x| x.location.name == location.name &&
+#                             x.repo_type == repo_type.to_s}
+    
 #   end
 
 end

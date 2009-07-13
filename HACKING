@@ -30,5 +30,8 @@ Backends specific lexicon
 -------------------------
   - Git
     - Repo::url -> remote name
+    
+    Remote
+    ------
 
 
