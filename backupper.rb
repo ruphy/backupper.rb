@@ -18,7 +18,7 @@ def debug string
   puts "--- #{Dir.pwd} ### #{string}" if $debug
 end
 
-# Force run
+# Force run, even in dry_run mode
 def f_run c
   run c, true
 end

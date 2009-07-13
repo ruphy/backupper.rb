@@ -16,7 +16,7 @@ Classes
       - url: Url (or the meaning of it for backends) of the repo
     
     Optional attributes:
-      - remotes: In case the backend is git, array of Remote. -Array(-Remote-)-
+      - remotes: In case the backend is git, array of Remote. -Array(Remote)-
 
     Location
     ---------
