@@ -14,9 +14,16 @@ class Location
     @repos << repo if repo.class == Repo
   end
   
-  # Returns a LocationManager of the type 'type' (symbol)
-  def manager_for type
-    return GitLocationManager.new(self) if type == :git
+  # True if we have at least one repo of type repo_type
+  def supports? repo_type
+    return true if ...
+    return false
+  end
+  
+  # Returns a LocationManager of the type 'type' (symbol), nil if we have no such thing.
+  def manager_for repo_type
+    return nil unless repo_types.contains repo_type ## FIXME check line's syntax!
+    return GitLocationManager.new(self) if repo_type == :git
   end
   
   # Returns an array of all repo types, in symbols

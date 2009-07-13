@@ -46,6 +46,7 @@ class Widget < Qt::Widget
     super(parent)
 
     @gits = Hash.new
+    @git = Hash.new
     
     @settings = SettingsManager.new
     @settings.repos("git").each do |r|
@@ -54,7 +55,11 @@ class Widget < Qt::Widget
       @gits[repo_sym] = GitManager.new(r) if @gits[repo_sym] == nil
       @gits[repo_sym].add_remote(r.url, :current_branch)
     end
-
+    
+    @settings.locations.each do |l|
+      @git[get_uid_for(l)] = l.manager_for(:git) unless l.manager_for(:git) == nil
+    end
+      
     l = Qt::VBoxLayout.new
     ui_widget = Qt::Widget.new
     @ui = Ui::Form.new
