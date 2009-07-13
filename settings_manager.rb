@@ -16,7 +16,7 @@ class Location
   
   # True if we have at least one repo of type repo_type
   def supports? repo_type
-    return true if ...
+#     return true if ...
     return false
   end
   
@@ -88,7 +88,7 @@ class SettingsManager
   def parse_config
     i = 0
     IO.foreach($config_file) do |line|
-      # counter
+      # line counter
       i = i + 1
       
       # don't parse carriage returns and extra spaces!
