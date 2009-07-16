@@ -69,13 +69,13 @@ class Widget < Qt::Widget
     @settings.locations.each do |location|
       l_sym = location.name.to_sym
       title = "#{location.name.capitalize}"
-      title += " (home)" if location.name == "gibak"
+      title += " (home)" if @git[location.uid].is_gibak
       group_box = Qt::GroupBox.new title
       status_label = Qt::Label.new
       buttons_header = Qt::Label.new "Git commands:"
       status_button = Qt::PushButton.new "status"
       commit_button = Qt::PushButton.new "add and commit"
-      commit_button.text = "gibak commit" if location.name == "gibak"
+      commit_button.text = "gibak commit" if @git[location.uid].is_gibak
       push_button = Qt::PushButton.new "push (...)"
       v_layout = Qt::VBoxLayout.new
       v_layout.add_widget buttons_header
@@ -112,14 +112,15 @@ class Widget < Qt::Widget
   def git_commit location
     log = String.new
     d = KDE::Dialog.new self
-    repo_sym = @settings.get_random_repo_for location, :git
+    is_gibak = @git[location.uid].is_gibak
     
-    if repo_sym == :gibak
+    if is_gibak
       label = Qt::Label.new "Really commit?"
       d.main_widget = label
+      d.exec
       
       if d.result == Qt::Dialog::Accepted then
-        @git[location.uid].commit "" # gibak commit
+        @git[location.uid].commit "" # gibak commit, log is not important
         return true
       end
       return false
@@ -128,7 +129,7 @@ class Widget < Qt::Widget
       t = Qt::TextEdit.new
       t.plain_text = "# log message \ncommit status as of:\n" + Time.now.to_s
       d.main_widget = t
-      if log.empty? && !location.name.to_sym == :gibak
+      if log.empty? && is_gibak
         log = "Empty log"
       end
       d.exec

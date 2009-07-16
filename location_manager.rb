@@ -34,8 +34,11 @@ class LocationManager
 end
 
 class GitLocationManager < LocationManager
+  attr_reader :is_gibak
+  
   def initialize location
     super(location)
+    @is_gibak = (@location.name == "gibak")
     @commit_makes_sense = true
   end
 
@@ -46,7 +49,7 @@ class GitLocationManager < LocationManager
   
   def commit log
     cd_path
-    if @location.name == "gibak"
+    if @is_gibak
       run("gibak commit")
     else
       run("git commit -m \"#{log}\"")
@@ -72,7 +75,7 @@ class GitLocationManager < LocationManager
   end
   
   def add
-    unless @location.name == "gibak"
+    unless @is_gibak
       cd @location.path
       run("git add .")
     end
