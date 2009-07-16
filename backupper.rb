@@ -45,17 +45,9 @@ class Widget < Qt::Widget
   def initialize parent = nil
     super(parent)
 
-#     @gits = Hash.new
     @git = Hash.new
     
-    @settings = SettingsManager.new
-    @settings.repos("git").each do |r|
-      next if !r.complete?
-      repo_sym = r.name.to_sym
-#       @gits[repo_sym] = GitManager.new(r) if @gits[repo_sym] == nil
-#       @gits[repo_sym].add_remote(r.url, :current_branch)
-    end
-    
+    @settings = SettingsManager.new    
     @settings.locations.each do |l|
       @git[l.uid] = l.manager_for(:git) if l.uses? :git
     end
@@ -95,8 +87,6 @@ class Widget < Qt::Widget
       h_layout.add_item v_layout
       group_box.layout = h_layout
 
-#       first_repo = @settings.get_repos_for(location).first
-#       repo_sym = first_repo.name.to_sym
       set_status_label_clean(status_label, @git[location.uid].working_dir_clean?)
 
       status_button.connect(SIGNAL :clicked) do
@@ -217,14 +207,9 @@ class Widget < Qt::Widget
           end
         end
       else
-	@settings.get_repos_for(location).each do |repo|
-#           if checkboxes[repo].is_checked
-# 	  puts repo.manager
+        @settings.get_repos_for(location).each do |repo|
             repo.manager.push
-#           end
         end
-# 	repo.manager.push
-#         @gits[location.name.to_sym].push
       end
     end
   end
