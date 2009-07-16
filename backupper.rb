@@ -131,7 +131,6 @@ class Widget < Qt::Widget
     t = Qt::TextEdit.new
     t.text = text
     t.read_only = true
-    d.size_grip_enabled = true
     d.main_widget = t
     d.show
   end

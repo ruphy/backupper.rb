@@ -81,8 +81,7 @@ class GitGui
     end
 
     w.layout = l
-
-    d.size_grip_enabled = true
+    
     d.main_widget = w
     d.exec
 
