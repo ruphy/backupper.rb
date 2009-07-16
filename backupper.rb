@@ -2,17 +2,20 @@
 $ui_file = "backupper.ui"
 $config_file = "backup_places.cfg"
 
-require 'korundum4'
-require 'settings_manager.rb'
-require 'git_manager.rb'
-# compile the rb file each time from the ui, so we make sure it's
-# up to date. it's very cheap, and easier for development
-system("rbuic4 #{$ui_file} > backupper_ui.rb")
-require 'backupper_ui.rb'
-
 # dev variables
 $debug = true
 $dry_run = true
+
+require 'korundum4'
+require 'settings_manager'
+require 'location_manager'
+require 'git_manager'
+require 'git_gui'
+# compile the rb file each time from the ui, so we make sure it's
+# up to date. it's very cheap, and easier for development-
+system("rbuic4 #{$ui_file} > backupper_ui.rb") if $debug
+require 'backupper_ui.rb'
+
 
 def debug string
   puts "--- #{Dir.pwd} ### #{string}" if $debug
@@ -47,11 +50,14 @@ class Widget < Qt::Widget
 
     @git = Hash.new
     
-    @settings = SettingsManager.new    
+    @settings = SettingsManager.new ## TODO: pass the filename in the constructor
     @settings.locations.each do |l|
       @git[l.uid] = l.manager_for(:git) if l.uses? :git
     end
-      
+    
+    GitGui.widget = self
+    GitGui.settings = @settings
+    
     l = Qt::VBoxLayout.new
     ui_widget = Qt::Widget.new
     @ui = Ui::Form.new
@@ -94,11 +100,11 @@ class Widget < Qt::Widget
       end
 
       push_button.connect(SIGNAL :clicked) do
-        git_push_dialog location
+        GitGui.push_dialog location
       end
 
       commit_button.connect(SIGNAL :clicked) do
-        if git_commit location
+        if GitGui.commit_ok? @git[location.uid], location
           set_status_label_clean(status_label, @git[location.uid].working_dir_clean?)
         end
       end
@@ -110,46 +116,6 @@ class Widget < Qt::Widget
   end
 
   def git_commit location
-    log = String.new
-    d = KDE::Dialog.new self
-    is_gibak = @git[location.uid].is_gibak
-    
-    if is_gibak
-      label = Qt::Label.new "Really commit?"
-      d.main_widget = label
-      d.exec
-      
-      if d.result == Qt::Dialog::Accepted then
-        @git[location.uid].commit "" # gibak commit, log is not important
-        return true
-      end
-      return false
-      
-    else
-      t = Qt::TextEdit.new
-      t.plain_text = "# log message \ncommit status as of:\n" + Time.now.to_s
-      d.main_widget = t
-      if log.empty? && is_gibak
-        log = "Empty log"
-      end
-      d.exec
-      
-      log = t.to_plain_text
-      clean_log = ""
-      log.split("\n").each do |line|
-        next if line.strip.start_with? '#'
-        clean_log += "#{line}\n"
-      end
-      clean_log.strip!
-      
-      if d.result == Qt::Dialog::Accepted then
-        @git[location.uid].add
-        @git[location.uid].commit clean_log
-        return true
-      end
-      return false
-    end
-    return false # we should never arrive here.
   end
 
   def set_status_label_clean label, clean
@@ -171,40 +137,7 @@ class Widget < Qt::Widget
   end
   
   def git_push_dialog location
-    d = KDE::Dialog.new self
 
-    w = Qt::Widget.new
-    l = Qt::VBoxLayout.new
-    label = Qt::Label.new("Please select the repos where you want to push:")
-    l.add_widget label
-
-    checkboxes = Hash.new
-
-    group_box = Qt::GroupBox.new "Push into individual repos"
-    group_box.layout = Qt::VBoxLayout.new
-    group_box.checkable = true
-    group_box.checked = false
-
-    l.add_widget group_box
-    @settings.get_repos_for(location).each do |repo|
-      checkboxes[repo] = Qt::CheckBox.new(
-                         "#{repo.name} - (#{repo.repo_type.to_s})",
-                         group_box)
-      
-      group_box.layout.add_widget checkboxes[repo]
-    end
-
-    w.layout = l
-
-    d.size_grip_enabled = true
-    d.main_widget = w
-    d.exec
-
-    if d.result == Qt::Dialog::Accepted then
-      @settings.get_repos_for(location).each do |repo|
-        repo.manager.push if !group_box.checked or checkboxes[repo].is_checked
-      end
-    end
   end
 
 end
