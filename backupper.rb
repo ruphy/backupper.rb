@@ -57,7 +57,7 @@ class Widget < Qt::Widget
     end
     
     @settings.locations.each do |l|
-      @git[get_uid_for(l)] = l.manager_for(:git) unless l.manager_for(:git) == nil
+      @git[l.uid] = l.manager_for(:git) if l.uses? :git
     end
       
     l = Qt::VBoxLayout.new

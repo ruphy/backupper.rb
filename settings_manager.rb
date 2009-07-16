@@ -10,32 +10,42 @@ class Location
     @managers = Hash.new
   end
   
+  def uid
+    return name.to_sym
+  end
+  
   def add_repo repo
     @repos << repo if repo.class == Repo
   end
   
   # True if we have at least one repo of type repo_type
-  def supports? repo_type
-#     return true if ...
+  def uses? repo_type
+    @repos.each do |r|
+      return true if r.repo_type.to_sym == repo_type.to_sym
+    end
     return false
   end
   
   # Returns a LocationManager of the type 'type' (symbol), nil if we have no such thing.
   def manager_for repo_type
-    return nil unless repo_types.contains repo_type ## FIXME check line's syntax!
-    return GitLocationManager.new(self) if repo_type == :git
+    return nil unless self.uses? repo_type
+    if @managers[repo_type] == nil
+      @managers[repo_type] = GitLocationManager.new(self) if repo_type == :git
+    end
+    
+    return @managers[repo_type]
   end
   
   # Returns an array of all repo types, in symbols
-  def repo_types
-    types = Array.new
-    @repos.each do |r|
-      types << r.repo_type.to_sym unless types.contain? r.repo_type.to_sym ## FIXME check this line's syntax!!!
-    end
-    return types
-  end
+#   def repo_types
+#     types = Array.new
+#     @repos.each do |r|
+#       types << r.repo_type.to_sym unless types.include? r.repo_type.to_sym
+#     end
+#     return types
+#   end
   
-  def repos repo_type = :any
+  def get_repos_for_type repo_type = :any
     return @repos if repo_type == :any
     return @repos.find_all {|x| x.repo_type.to_sym == repo_type.to_sym }
   end
@@ -164,16 +174,7 @@ class SettingsManager
   
   # Returns an UID for the specified location, as symbol.
   def get_uid_for location
-    
+    return location.name.to_sym ## TODO maybe make me a little more complex?
   end
-  
-#   def get_location_manager_for location, repo_type = :any
-#     if repo_type == :any
-#       return @repos.find {|x| x.location.name == location.name }
-#     end
-#     return @repos.find {|x| x.location.name == location.name &&
-#                             x.repo_type == repo_type.to_s}
-    
-#   end
 
 end
