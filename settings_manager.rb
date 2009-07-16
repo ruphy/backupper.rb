@@ -95,7 +95,7 @@ class SettingsManager
     parse_config
   end
 
-  def parse_location line
+  def try_to_parse_location line
     if line.start_with? '['
       c = line.split('=')
       c[0].gsub!('[', '').gsub!(']', '')
