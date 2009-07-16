@@ -95,6 +95,23 @@ class SettingsManager
     parse_config
   end
 
+  def parse_location line
+    if line.start_with? '['
+      c = line.split('=')
+      c[0].gsub!('[', '').gsub!(']', '')
+      l = Location.new
+      l.name = c[0]
+      l.path = c[1]
+      @locations << l
+      if !l.complete?
+        ErrorManager.abort_malformed_config_line i, line
+        return false # We'll exit here anyways, just for code clarity.
+      end
+      return true
+    end
+    return false
+  end
+  
   def parse_config
     i = 0
     IO.foreach($config_file) do |line|
@@ -109,18 +126,7 @@ class SettingsManager
       next if line.empty?
       
       # first, locations!
-      if line.start_with? '['
-        c = line.split('=')
-        c[0].gsub!('[', '').gsub!(']', '')
-        l = Location.new
-        l.name = c[0]
-        l.path = c[1]
-        @locations << l
-        if !l.complete?
-          ErrorManager.abort_malformed_config_line i, line
-        end
-        next
-      end
+      next if try_to_parse_location line
       
       # if we arrive here, it's a repo config.
       config = line.split(',')
