@@ -200,16 +200,8 @@ class Widget < Qt::Widget
     d.exec
 
     if d.result == Qt::Dialog::Accepted then
-      if group_box.checked
-        @settings.get_repos_for(location).each do |repo|
-          if checkboxes[repo].is_checked
-            @gits[location.name.to_sym].push repo.remote
-          end
-        end
-      else
-        @settings.get_repos_for(location).each do |repo|
-            repo.manager.push
-        end
+      @settings.get_repos_for(location).each do |repo|
+        repo.manager.push if !group_box.checked or checkboxes[repo].is_checked
       end
     end
   end
