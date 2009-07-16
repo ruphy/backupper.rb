@@ -65,7 +65,7 @@ class Widget < Qt::Widget
     @ui = Ui::Form.new
     @ui.setup_ui ui_widget
 
-    add_gits
+#     add_gits
 
     l.addWidget Qt::Label.new "<big><center><b>ruphy</b>'s Backup Manager!</center></big>"
     l.addWidget ui_widget
