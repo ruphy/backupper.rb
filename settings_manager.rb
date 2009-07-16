@@ -2,6 +2,21 @@
 require 'error_manager'
 require 'location_manager'
 
+# internal function, to get managers easier
+def get_manager object, repo_type = nil
+  manager = nil
+  if object.class == Location
+    manager = GitLocationManager.new(object) if repo_type.to_sym == :git
+  elsif object.class == Repo
+    manager = GitManager.new(object) if object.repo_type.to_sym == :git
+  end
+  
+  if manager == nil
+    puts "WARNING: no manager found for object #{object} of type #{repo_type}. Please report a bug" # TODO Better text
+  end
+  return manager
+end
+
 class Location
   attr_accessor :name, :path
 
@@ -26,13 +41,12 @@ class Location
     return false
   end
   
-  # Returns a LocationManager of the type 'type' (symbol), nil if we have no such thing.
+  # Returns a LocationManager of the type 'repo_type' (symbol), nil if we have no such thing.
   def manager_for repo_type
     return nil unless self.uses? repo_type
     if @managers[repo_type] == nil
-      @managers[repo_type] = GitLocationManager.new(self) if repo_type == :git
+      @managers[repo_type] = get_manager self, repo_type
     end
-    
     return @managers[repo_type]
   end
   
@@ -69,10 +83,18 @@ class Repo
   
   def initialize
     @remotes = Array.new
+    @manager = nil
   end
   
   def add_remote remote
     @remotes << remote
+  end
+  
+  def manager
+    if @manager == nil
+      @manager = get_manager self
+    end
+    return @manager
   end
   
   def complete?

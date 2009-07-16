@@ -24,8 +24,8 @@ def f_run c
 end
 
 def run command, force_run = false
-  debug "pretending to run -- #{command}" if $dry_run
-  debug("executing '" + command +"'") unless $dry_run
+  debug "pretending to run -- #{command}" if ($dry_run and !force_run)
+  debug "running '" + command +"'" unless ($dry_run and !force_run)
   `#{command}` unless ($dry_run and !force_run)
 end
 
@@ -45,15 +45,15 @@ class Widget < Qt::Widget
   def initialize parent = nil
     super(parent)
 
-    @gits = Hash.new
+#     @gits = Hash.new
     @git = Hash.new
     
     @settings = SettingsManager.new
     @settings.repos("git").each do |r|
       next if !r.complete?
       repo_sym = r.name.to_sym
-      @gits[repo_sym] = GitManager.new(r) if @gits[repo_sym] == nil
-      @gits[repo_sym].add_remote(r.url, :current_branch)
+#       @gits[repo_sym] = GitManager.new(r) if @gits[repo_sym] == nil
+#       @gits[repo_sym].add_remote(r.url, :current_branch)
     end
     
     @settings.locations.each do |l|
@@ -65,7 +65,7 @@ class Widget < Qt::Widget
     @ui = Ui::Form.new
     @ui.setup_ui ui_widget
 
-#     add_gits
+    add_gits
 
     l.addWidget Qt::Label.new "<big><center><b>ruphy</b>'s Backup Manager!</center></big>"
     l.addWidget ui_widget
@@ -95,12 +95,12 @@ class Widget < Qt::Widget
       h_layout.add_item v_layout
       group_box.layout = h_layout
 
-      first_repo = @settings.get_repos_for(location).first
-      repo_sym = first_repo.name.to_sym
-      set_status_label_clean(status_label, @gits[repo_sym].working_dir_clean?)
+#       first_repo = @settings.get_repos_for(location).first
+#       repo_sym = first_repo.name.to_sym
+      set_status_label_clean(status_label, @git[location.uid].working_dir_clean?)
 
       status_button.connect(SIGNAL :clicked) do
-        show_index_status_dialog @gits[repo_sym].status
+        show_index_status_dialog @git[location.uid].status
       end
 
       push_button.connect(SIGNAL :clicked) do
@@ -109,7 +109,7 @@ class Widget < Qt::Widget
 
       commit_button.connect(SIGNAL :clicked) do
         if git_commit location
-          set_status_label_clean(status_label, @gits[repo_sym].working_dir_clean?)
+          set_status_label_clean(status_label, @git[location.uid].working_dir_clean?)
         end
       end
 
@@ -129,7 +129,7 @@ class Widget < Qt::Widget
       d.main_widget = label
       
       if d.result == Qt::Dialog::Accepted then
-        @gits[repo_sym].commit "" # gibak commit
+        @git[location.uid].commit "" # gibak commit
         return true
       end
       return false
@@ -152,8 +152,8 @@ class Widget < Qt::Widget
       clean_log.strip!
       
       if d.result == Qt::Dialog::Accepted then
-        @gits[repo_sym].add
-        @gits[repo_sym].commit clean_log
+        @git[location.uid].add
+        @git[location.uid].commit clean_log
         return true
       end
       return false
@@ -217,7 +217,14 @@ class Widget < Qt::Widget
           end
         end
       else
-        @gits[location.name.to_sym].push
+	@settings.get_repos_for(location).each do |repo|
+#           if checkboxes[repo].is_checked
+# 	  puts repo.manager
+            repo.manager.push
+#           end
+        end
+# 	repo.manager.push
+#         @gits[location.name.to_sym].push
       end
     end
   end

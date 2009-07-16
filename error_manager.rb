@@ -5,4 +5,10 @@ class ErrorManager
     puts ">> #{text}"
     exit 1
   end
+  def ErrorManager.warning reason
+    puts
+    puts "*** WARNING! *** -- #{reason}"
+    puts
+  end
+    
 end
