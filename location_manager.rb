@@ -1,4 +1,4 @@
-
+# require 'flickr_location_manager'
 
 class LocationManager
   attr_accessor :commit_makes_sense # bool, true if the commit (git meaning) concept makes sense in the backend
@@ -14,7 +14,7 @@ class LocationManager
   end
   
   def working_dir_clean?
-    # Reimplement!
+    # Reimplement if commit_makes_sense!
     # returns a bool
   end
   

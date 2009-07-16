@@ -93,7 +93,7 @@ class FlickrManager
   def sync_dir dir
     # TODO: think of a better name scheme
     # maybe the title should include the relative path?
-    calculated_photoset_name = "[ruphy-backup]#{dir}"
+    calculated_photoset_name = "[ruphy-backup] #{dir}"
     Dir.chdir @root + '/' + dir
 
     if photoset_exist? calculated_photoset_name
