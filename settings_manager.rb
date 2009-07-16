@@ -202,10 +202,5 @@ class SettingsManager
     return @repos.find {|x| x.location.name == location.name &&
                             x.repo_type == repo_type.to_s}
   end
-  
-  # Returns an UID for the specified location, as symbol.
-  def get_uid_for location
-    return location.name.to_sym ## TODO maybe make me a little more complex?
-  end
 
 end

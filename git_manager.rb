@@ -25,7 +25,7 @@ class GitManager
   end
 
   def push
-    debug "pushing '#{@repo.location.name}' to '#{@repo.name}'"
+    debug "pushing '#{@repo.location.name}' to '#{@repo.name}'..."
     run "git push #{@remote.remote} #{@remote.branch}"
   end
 
