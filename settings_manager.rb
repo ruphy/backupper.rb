@@ -100,7 +100,7 @@ class Repo
   def complete?
     begin
       if !name.empty? && !url.empty? &&
-         location.complete? && !repo_type.empty?
+         location.complete?
         return true
       end
     rescue NoMethodError
@@ -153,9 +153,12 @@ class SettingsManager
       # if we arrive here, it's a repo config.
       config = line.split(',')
       repo = Repo.new
-      # TODO: use symbols and lowercase stuff.
       repo.location = @locations.find {|x| x.name == config[0] }
-      repo.repo_type = config[1]
+      begin
+        repo.repo_type = config[1].downcase.to_sym
+      rescue ArgumentError # repo_type == ""
+        ErrorManager.abort_malformed_config_line i, line
+      end
       repo.name = config[2]
       repo.url = config[3]
       repo.location.add_repo repo # Associate the repo to the location
