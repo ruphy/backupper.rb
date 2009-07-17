@@ -1,5 +1,4 @@
 # require 'flickr_location_manager'
-require 'git_location_manager'
 
 class LocationManager
   attr_accessor :commit_makes_sense # bool, true if the commit (git meaning) concept makes sense in the backend
@@ -34,3 +33,5 @@ class LocationManager
   
 end
 
+
+require 'git_location_manager'

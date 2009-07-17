@@ -2,10 +2,6 @@
 $ui_file = "backupper.ui"
 $config_file = "backup_places.cfg"
 
-# dev variables
-$debug = true
-$dry_run = true
-
 require 'korundum4'
 require 'settings_manager'
 require 'location_manager'
@@ -13,6 +9,7 @@ require 'git_manager'
 require 'git_gui'
 
 require 'common'
+read_global_vars $config_file
 
 # compile the rb file each time from the ui, so we make sure it's
 # up to date. it's very cheap, and easier for development-

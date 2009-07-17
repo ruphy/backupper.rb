@@ -148,6 +148,8 @@ class SettingsManager
       next if line.start_with? '#'
       next if line.empty?
       
+      next if line.include? 'config.'
+      
       # first, locations!
       next if try_to_parse_location line
       

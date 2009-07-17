@@ -1,4 +1,6 @@
 
+require 'location_manager'
+
 class GitLocationManager < LocationManager
   attr_reader :is_gibak
   

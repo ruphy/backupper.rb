@@ -1,4 +1,19 @@
 
+def read_global_vars filename
+  $debug = false
+  $dry_run = false
+  IO.foreach(filename) do |line|
+  # don't parse carriage returns and extra spaces!
+  line.strip!
+  
+  # skip comments, empty line
+  next if line.start_with? '#'
+  next if line.empty?
+  $debug = true if line == "config.debug"
+  $dry_run = true if line == "config.dry_run"
+  end
+end
+
 def debug string
   puts "--- #{Dir.pwd} ### #{string}" if $debug
 end
