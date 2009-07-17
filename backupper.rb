@@ -90,9 +90,6 @@ class Widget < Qt::Widget
     @ui.git_layout.add_stretch
   end
 
-  def git_commit location
-  end
-
   def set_status_label_clean label, clean
     if clean
       label.text = "The index is <b style=\"color:#55aa00;\">clean</b>."
@@ -110,9 +107,5 @@ class Widget < Qt::Widget
     d.show
   end
   
-  def git_push_dialog location
-
-  end
-
 end
 
