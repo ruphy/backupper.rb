@@ -50,7 +50,7 @@ class Widget < Qt::Widget
 
     @git = Hash.new
     
-    @settings = SettingsManager.new ## TODO: pass the filename in the constructor
+    @settings = SettingsManager.new $config_file
     @settings.locations.each do |l|
       @git[l.uid] = l.manager_for(:git) if l.uses? :git
     end

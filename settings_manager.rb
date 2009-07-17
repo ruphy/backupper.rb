@@ -111,9 +111,10 @@ end
 
 class SettingsManager
 
-  def initialize
+  def initialize filename
     @repos = Array.new
     @locations = Array.new
+    @filename = filename
     parse_config
   end
 
@@ -136,7 +137,7 @@ class SettingsManager
   
   def parse_config
     i = 0
-    IO.foreach($config_file) do |line|
+    IO.foreach(@filename) do |line|
       # line counter
       i = i + 1
       
