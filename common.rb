@@ -12,6 +12,24 @@ def read_global_vars filename
   $debug = true if line == "config.debug"
   $dry_run = true if line == "config.dry_run"
   end
+  
+  $types = Array.new
+  $types << :git if has_git
+  $types << :rsync if has_rsync
+  $types << :flickr if has_flickr
+end
+
+def has_git
+  return false if `which git`.include? 'which: no git in' ## TODO okay, this is a bit hacky :-)
+  return true
+end
+
+def has_rsync
+  return false
+end
+
+def has_flickr
+  return false
 end
 
 def debug string

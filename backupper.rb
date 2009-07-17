@@ -9,6 +9,7 @@ require 'git_manager'
 require 'git_gui'
 
 require 'common'
+# Sets $types, $debug and $dry_run
 read_global_vars $config_file
 
 # compile the rb file each time from the ui, so we make sure it's
