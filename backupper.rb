@@ -6,6 +6,7 @@ require 'korundum4'
 require 'settings_manager'
 require 'location_manager'
 require 'git_manager'
+require 'gui'
 require 'git_gui'
 
 require 'common'
@@ -30,7 +31,7 @@ class Widget < Qt::Widget
       @git[l.uid] = l.manager_for(:git) if l.uses? :git
     end
     
-    GitGui.widget = self
+    Gui.widget = self
     GitGui.settings = @settings
     
     l = Qt::VBoxLayout.new
@@ -71,7 +72,7 @@ class Widget < Qt::Widget
       set_status_label_clean(status_label, @git[location.uid].working_dir_clean?)
 
       status_button.connect(SIGNAL :clicked) do
-        show_index_status_dialog @git[location.uid].status
+        Gui.show_index_status_dialog @git[location.uid].status
       end
 
       push_button.connect(SIGNAL :clicked) do
@@ -98,14 +99,5 @@ class Widget < Qt::Widget
     end
   end
 
-  def show_index_status_dialog text
-    d = KDE::Dialog.new self
-    t = Qt::TextEdit.new
-    t.text = text
-    t.read_only = true
-    d.main_widget = t
-    d.show
-  end
-  
 end
 

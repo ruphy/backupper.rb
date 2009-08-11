@@ -1,14 +1,12 @@
 
+require 'gui'
+
 # Class to handle git operations with a friendly GUI.
 # Before using it, make sure to call GitGui.settings = the SettingsManager you're using.
-# GitGui.widget can also be used to set the parent of the dialogs
+# Gui.widget can also be used to set the parent of the dialogs
 
-class GitGui
-  
-  def GitGui.widget= w
-    @widget = w
-  end
-  
+class GitGui < Gui
+
   def GitGui.settings= s
     @settings = s
   end
