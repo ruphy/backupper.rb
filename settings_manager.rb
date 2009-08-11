@@ -50,15 +50,6 @@ class Location
     return @managers[repo_type]
   end
   
-  # Returns an array of all repo types, in symbols
-#   def repo_types
-#     types = Array.new
-#     @repos.each do |r|
-#       types << r.repo_type.to_sym unless types.include? r.repo_type.to_sym
-#     end
-#     return types
-#   end
-  
   def get_repos_for_type repo_type = :any
     return @repos if repo_type == :any
     return @repos.find_all {|x| x.repo_type.to_sym == repo_type.to_sym }
@@ -118,7 +109,7 @@ class SettingsManager
     parse_config
   end
 
-  def try_to_parse_location line
+  def parsed_location? line
     if line.start_with? '['
       c = line.split('=')
       c[0].gsub!('[', '').gsub!(']', '')
@@ -133,6 +124,24 @@ class SettingsManager
       return true
     end
     return false
+  end
+  
+  def parse_repo line
+      config = line.split(',')
+      repo = Repo.new
+      repo.location = @locations.find {|x| x.name == config[0] }
+      begin
+        repo.repo_type = config[1].downcase.to_sym
+      rescue ArgumentError # means that repo_type == ""
+        ErrorManager.abort_malformed_config_line i, line
+      end
+      repo.name = config[2]
+      repo.url = config[3]
+      repo.location.add_repo repo # Associate the repo to the location
+      @repos << repo
+      if !repo.complete?
+        ErrorManager.abort_malformed_config_line i, line
+      end
   end
   
   def parse_config
@@ -151,24 +160,10 @@ class SettingsManager
       next if line.include? 'config.'
       
       # first, locations!
-      next if try_to_parse_location line
+      next if parsed_location? line
       
       # if we arrive here, it's a repo config.
-      config = line.split(',')
-      repo = Repo.new
-      repo.location = @locations.find {|x| x.name == config[0] }
-      begin
-        repo.repo_type = config[1].downcase.to_sym
-      rescue ArgumentError # repo_type == ""
-        ErrorManager.abort_malformed_config_line i, line
-      end
-      repo.name = config[2]
-      repo.url = config[3]
-      repo.location.add_repo repo # Associate the repo to the location
-      @repos << repo
-      if !repo.complete?
-        ErrorManager.abort_malformed_config_line i, line
-      end
+      parse_repo line
     end
   end
 
