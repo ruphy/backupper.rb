@@ -54,21 +54,30 @@ class Widget < Qt::Widget
       title += " (home)" if @git[location.uid].is_gibak
       group_box = Qt::GroupBox.new title
       status_label = Qt::Label.new
-      buttons_header = Qt::Label.new "Git commands:"
       status_button = Qt::PushButton.new "status"
       commit_button = Qt::PushButton.new "add and commit"
       commit_button.text = "gibak commit" if @git[location.uid].is_gibak
       push_button = Qt::PushButton.new "push (...)"
+      status_layout = Qt::VBoxLayout.new
+      status_layout.add_widget Qt::Label.new "Last pushes:", group_box
       v_layout = Qt::VBoxLayout.new
-      v_layout.add_widget buttons_header
       v_layout.add_widget status_button
       v_layout.add_widget commit_button
       v_layout.add_widget push_button
+      left_layout = Qt::VBoxLayout.new
+      left_layout.add_widget status_label
+      left_layout.add_stretch
+      left_layout.add_item status_layout
       h_layout = Qt::HBoxLayout.new
-      h_layout.add_widget status_label
+      h_layout.add_item left_layout
       h_layout.add_item v_layout
       group_box.layout = h_layout
 
+      @settings.get_repos_for(location).each do |repo|
+        string = "#{repo.name} - "#{lookup_lastest_push_for repo}"
+        status_layout.add_widget Qt::Label.new string, group_box
+      end
+      
       set_status_label_clean(status_label, @git[location.uid].working_dir_clean?)
 
       status_button.connect(SIGNAL :clicked) do
